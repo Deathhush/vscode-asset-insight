@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { PortfolioExplorerProvider } from './providers/portfolioExplorerProvider';
 import { AssetNode } from './providers/assetNode';
+import { PortfolioNode } from './providers/portfolioNode';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -51,8 +52,18 @@ export function activate(context: vscode.ExtensionContext) {
 				await assetNode.openAssetPage(context);
 			}
 		}
-	);	
-	context.subscriptions.push(disposableHelloWorld, disposableRefresh, disposableUpdateAssets, disposableOpenAssetPage);
+	);
+
+	// Register command to open Portfolio Page
+	const disposableOpenPortfolioPage = vscode.commands.registerCommand(
+		'vscode-portfolio-insight.openPortfolioPage',
+		async (portfolioNode: PortfolioNode) => {
+			if (portfolioNode && portfolioNode.nodeType === 'portfolio') {
+				await portfolioNode.openPortfolioPage(context);
+			}
+		}
+	);
+	context.subscriptions.push(disposableHelloWorld, disposableRefresh, disposableUpdateAssets, disposableOpenAssetPage, disposableOpenPortfolioPage);
 	context.subscriptions.push(vscode.commands.registerCommand('vscode-portfolio-insight.editAssetDefinition', 
 		() => {
 			portfolioExplorerProvider.openAssetDefinitionEditor();

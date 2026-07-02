@@ -3,11 +3,15 @@ import { PortfolioExplorerNode, PortfolioExplorerProvider } from './portfolioExp
 import { AccountNode } from './accountNode';
 import { AssetNode } from './assetNode';
 import { AssetNetValueData } from '../data/interfaces';
+import { PortfolioPageView } from '../views/portfolioPage/portfolioPageView';
 
 export class PortfolioNode implements PortfolioExplorerNode {
     public nodeType: 'portfolio' = 'portfolio';
-    
-    constructor(private provider: PortfolioExplorerProvider) {
+    public provider: PortfolioExplorerProvider; // Reference to the provider
+    private portfolioPageView?: PortfolioPageView; // Reference to the current webview for the portfolio
+
+    constructor(provider: PortfolioExplorerProvider) {
+        this.provider = provider;
     }
 
     private async getDescription(): Promise<string> {
@@ -58,11 +62,40 @@ export class PortfolioNode implements PortfolioExplorerNode {
         const treeItem = new vscode.TreeItem('Assets', vscode.TreeItemCollapsibleState.Expanded);
         treeItem.iconPath = new vscode.ThemeIcon('folder');
         treeItem.contextValue = 'assets';
-        
+
         // Get description with portfolio total value
         treeItem.description = await this.getDescription();
-        
+
+        // Set command to open the portfolio page when clicked
+        treeItem.command = {
+            command: 'vscode-portfolio-insight.openPortfolioPage',
+            title: 'Open Portfolio Page',
+            arguments: [this]
+        };
+
         return treeItem;
+    }
+
+    // Command handling
+    async openPortfolioPage(context: vscode.ExtensionContext): Promise<void> {
+        // Check if a webview already exists for the portfolio
+        if (this.portfolioPageView) {
+            // Focus the existing webview
+            this.portfolioPageView.reveal();
+            console.log('Focused existing portfolio page');
+            return;
+        }
+
+        // Create new PortfolioPageView
+        this.portfolioPageView = new PortfolioPageView(context.extensionUri, this);
+
+        // Set up disposal handler to clear the reference when webview is closed
+        this.portfolioPageView.onDispose(() => {
+            this.portfolioPageView = undefined;
+            console.log('Cleared portfolio page view reference');
+        });
+
+        console.log('Created new portfolio page');
     }
 
     /**

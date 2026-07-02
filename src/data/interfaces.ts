@@ -104,6 +104,21 @@ export interface AssetSummaryData {
     valueHistory: AssetDailyRecordData[];
 }
 
+// Portfolio-level aggregation interfaces
+export interface PortfolioHoldingData {
+    fullName: string; // Unique identifier (account.assetName or assetName)
+    name: string; // Display name of the asset
+    type: string; // Asset type (simple, investment, composite, stock)
+    account?: string; // Account name if the asset belongs to one
+    currentValue: AssetNetValueData; // Current value of this holding
+}
+
+export interface PortfolioSummaryData {
+    currentValue: AssetNetValueData; // Total portfolio value (always in CNY)
+    holdings: PortfolioHoldingData[]; // Per-asset breakdown of the portfolio
+    valueHistory: AssetDailyRecordData[]; // Aggregated portfolio value over time (in CNY)
+}
+
 // Category-related interfaces
 export interface CategoryData {
     name: string;
